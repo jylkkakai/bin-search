@@ -1,29 +1,25 @@
 CC = gcc
 
-TARGET_EXEC := bin_search 
+TARGET_EXE := bin_search
 
 BUILD_DIR := ./build
-SRC_DIRS := ./src
+SRC_DIR := ./src
 
-SRCS := $(shell find $(SRC_DIRS) -name '*.cpp' -or -name '*.c' -or -name '*.s')
+VPATH = ./src 
 
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+OBJS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(wildcard $(SRC_DIR)/*.c))
+DEPS := $(wildcard $(SRC_DIR)/*.h)
 
+$(BUILD_DIR)/$(TARGET_EXE): $(OBJS)
+	$(CC) $^ -o $@ 
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d)
-INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-
-
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LDFLAGS)
-
-$(BUILD_DIR)/%.c.o: %.c
+$(BUILD_DIR)/%.o: %.c $(DEPS)
+	echo $(OBJS)
 	mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
-
-
-
-.PHONY: clean
+	$(CC) $< -c  -o $@
+ 
 clean:
 	rm -r $(BUILD_DIR)
+	
 
